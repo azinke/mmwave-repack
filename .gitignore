@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# Virtual environment
+venv
+
+# Allow all python scripts
+!*.py
+
+# Track gitignore file
+!.gitignore
