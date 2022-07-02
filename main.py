@@ -22,7 +22,7 @@ def getInfo(idx_file: str) -> tuple[int, int]:
                  uint32_t tag;
                  uint32_t version;
                  uint32_t flags;
-                 uint32_t numIdx;       // number of frames 
+                 uint32_t numIdx;       // number of frames
                  uint64_t dataFileSize; // total data size written into file
              };
 
@@ -39,7 +39,7 @@ def getInfo(idx_file: str) -> tuple[int, int]:
                   * For image data, this is pitch. For raw data, this is
                   * size in bytes per metadata plane
                   */
-                 uint32_t pitchOrMetaSize[4]; 
+                 uint32_t pitchOrMetaSize[4];
 
                 /*
                  * Total size in bytes of the data in the buffer
@@ -184,10 +184,10 @@ def toframe(
         for tidx in range(nchip * ntx):
             for ridx in range(nrx):
                 frame[tidx, :, :, :, :] = np.vstack((
-                    dev1[tidx, :, :, :, :],
-                    dev2[tidx, :, :, :, :],
-                    dev3[tidx, :, :, :, :],
                     dev4[tidx, :, :, :, :],
+                    dev1[tidx, :, :, :, :],
+                    dev3[tidx, :, :, :, :],
+                    dev2[tidx, :, :, :, :],
                 ))
         # Name for saving the frame
         fname: str = f"frame_{fidx -  nf_skip + start_idx}.bin"
