@@ -248,6 +248,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # The output directory will be created inside the data directory by default
+    if (args.input_dir != INPUT_DIR) and (args.output_dir == OUTPUT_DIR):
+        args.output_dir = os.path.join(args.input_dir, OUTPUT_DIR)
+
     if not os.path.isdir(args.output_dir):
         os.mkdir(args.output_dir)
 
