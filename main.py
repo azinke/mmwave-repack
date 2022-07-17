@@ -158,12 +158,12 @@ def toframe(
     nrx: int = 4
 
     # Number of frame to skip at the beginning of the recording
-    nf_skip: int = 2
+    nf_skip: int = 1
 
-    # Index of the last frame generated
-    last_idx: int = 0
+    # Index used to number frames
+    fk: int = start_idx
 
-    for fidx in range(nf_skip, nf + nf_skip):
+    for fidx in range(nf_skip, nf):
         # Number of bytes to read
         nbytes: int = nwave * ns * nc * ntx * nrx * nchip
         # Offet to read the bytes of a given frame
@@ -190,13 +190,14 @@ def toframe(
                     dev2[tidx, :, :, :, :],
                 ))
         # Name for saving the frame
-        fname: str = f"frame_{fidx -  nf_skip + start_idx}.bin"
+        fname: str = f"frame_{fk}.bin"
         fpath: str = os.path.join(output, fname)
         frame.astype(np.int16).tofile(fpath)
-        print(f"Frame {fidx -  nf_skip + start_idx} written!")
-        last_idx += 1
+        print(f"Frame {fk} written!")
+        fk += 1
     print()
-    return last_idx
+    # Return the index of the last frame generated
+    return fk - 1
 
 
 if __name__ == "__main__":
@@ -299,7 +300,11 @@ if __name__ == "__main__":
 
         nf, _ = getInfo(mf_idx)
 
-        toframe(
+        # Skip if the number of valid frame is 0
+        if not nf:
+            continue
+
+        previous_nf = toframe(
             mf, sf1, sf2, sf3, # Input data files
             args.number_samples,
             args.number_chirps,
@@ -307,6 +312,5 @@ if __name__ == "__main__":
             args.output_dir,
             start_idx=previous_nf + 1
         )
-        previous_nf += nf
 
     print(f"[SUCCESS]: {previous_nf:04d} MIMO frames successfully generated!")
