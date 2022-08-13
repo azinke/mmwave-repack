@@ -144,7 +144,7 @@ def toframe(
                 - Quadrature signal (Q)
     """
     # Number of waveform measured
-    # 2-bytes (signed integer) for I (In-phase signal
+    # 2-bytes (signed integer) for I (In-phase signal)
     # 2.bytes (signed integer) for Q (Quadrature signal)
     nwave: int = 2
 
@@ -164,31 +164,33 @@ def toframe(
     fk: int = start_idx
 
     for fidx in range(nf_skip, nf):
-        # Number of bytes to read
-        nbytes: int = nwave * ns * nc * ntx * nrx * nchip
+        # Number of items to read (here items are 16-bit integer values)
+        nitems: int = nwave * ns * nc * nrx * ntx * nchip
         # Offet to read the bytes of a given frame
-        offset: int = fidx * nbytes
+        # The multiplication by "2" is to count for the size of 16-bit integers
+        offset: int = fidx * nitems * 2
 
-        dev1 = np.fromfile(mf, dtype=np.int16, count=nbytes, offset=offset)
-        dev2 = np.fromfile(sf0, dtype=np.int16, count=nbytes, offset=offset)
-        dev3 = np.fromfile(sf1, dtype=np.int16, count=nbytes, offset=offset)
-        dev4 = np.fromfile(sf2, dtype=np.int16, count=nbytes, offset=offset)
+        dev1 = np.fromfile(mf, dtype=np.int16, count=nitems, offset=offset)
+        dev2 = np.fromfile(sf0, dtype=np.int16, count=nitems, offset=offset)
+        dev3 = np.fromfile(sf1, dtype=np.int16, count=nitems, offset=offset)
+        dev4 = np.fromfile(sf2, dtype=np.int16, count=nitems, offset=offset)
 
-        dev1 = dev1.reshape(nchip * ntx, nrx, nc, ns, 2)
-        dev2 = dev2.reshape(nchip * ntx, nrx, nc, ns, 2)
-        dev3 = dev3.reshape(nchip * ntx, nrx, nc, ns, 2)
-        dev4 = dev4.reshape(nchip * ntx, nrx, nc, ns, 2)
+        dev1 = dev1.reshape(nc, ntx * nchip, ns, nrx, 2)
+        dev2 = dev2.reshape(nc, ntx * nchip, ns, nrx, 2)
+        dev3 = dev3.reshape(nc, ntx * nchip, ns, nrx, 2)
+        dev4 = dev4.reshape(nc, ntx * nchip, ns, nrx, 2)
+
+        dev1 = np.transpose(dev1, (1, 3, 0, 2, 4))
+        dev2 = np.transpose(dev2, (1, 3, 0, 2, 4))
+        dev3 = np.transpose(dev3, (1, 3, 0, 2, 4))
+        dev4 = np.transpose(dev4, (1, 3, 0, 2, 4))
 
         frame = np.zeros((nchip * ntx, nrx * nchip, nc, ns, 2))
+        frame[:, 0:4, :, :] = dev4
+        frame[:, 4:8, :, :] = dev1
+        frame[:, 8:12, :, :] = dev3
+        frame[:, 12:16, :, :] = dev2
 
-        for tidx in range(nchip * ntx):
-            for ridx in range(nrx):
-                frame[tidx, :, :, :, :] = np.vstack((
-                    dev4[tidx, :, :, :, :],
-                    dev1[tidx, :, :, :, :],
-                    dev3[tidx, :, :, :, :],
-                    dev2[tidx, :, :, :, :],
-                ))
         # Name for saving the frame
         fname: str = f"frame_{fk}.bin"
         fpath: str = os.path.join(output, fname)
@@ -211,7 +213,7 @@ if __name__ == "__main__":
     NS: int = 256
 
     # Number of chirps
-    NC: int = 64
+    NC: int = 16
 
     parser = argparse.ArgumentParser(
         prog="MMWAVECAS-RF-EVM board recordings post-processing routine",
@@ -254,7 +256,7 @@ if __name__ == "__main__":
         args.output_dir = os.path.join(args.input_dir, OUTPUT_DIR)
 
     if not os.path.isdir(args.output_dir):
-        os.mkdir(args.output_dir)
+        os.makedirs(args.output_dir, exist_ok=True)
 
     # Load devices recording file paths
     master: dict[str, list[str]] = load(args.input_dir, "master")
