@@ -1,10 +1,17 @@
-"""Format Recordings."""
+"""Format MMWCAS-RF-EVM & MMWCAS-DSP-EVM kit Recordings.
+
+    @author: AMOUSSOU Z. Kenneth
+    @date: 13-08-2022
+"""
 from typing import Optional
 import os
 import glob
 import argparse
 import sys
 import numpy as np
+
+__VERSION__: str = "0.1"
+__COPYRIGHT__: str = "Copyright (C) 2022, RWU-RADAR Project"
 
 
 def getInfo(idx_file: str) -> tuple[int, int]:
@@ -206,9 +213,6 @@ if __name__ == "__main__":
     # Output directory that would hold the formatted data per frame
     OUTPUT_DIR: str = "output"
 
-    # Input directory containing the recordings from mmwave studio
-    INPUT_DIR: str = "."
-
     # Number of samples
     NS: int = 256
 
@@ -216,8 +220,9 @@ if __name__ == "__main__":
     NC: int = 16
 
     parser = argparse.ArgumentParser(
-        prog="MMWAVECAS-RF-EVM board recordings post-processing routine",
-        description="Repack the recordings into MIMO frames"
+        prog="repack.py",
+        description="MMWAVECAS-RF-EVM board recordings post-processing routine. "
+                    "Repack the recordings into MIMO frames"
     )
     parser.add_argument(
         "-v", "--version",
@@ -246,13 +251,21 @@ if __name__ == "__main__":
         "-i", "--input-dir",
         help="Inpout directory containing the recordings",
         type=str,
-        default=INPUT_DIR,
+        default=None,
     )
 
     args = parser.parse_args()
 
+    if args.version:
+        print(f"mmwave-repack version {__VERSION__}, {__COPYRIGHT__}")
+        sys.exit(0)
+
+    if args.input_dir is None:
+        print("[ERROR]: Missing input directory to read recordings")
+        sys.exit(1)
+
     # The output directory will be created inside the data directory by default
-    if (args.input_dir != INPUT_DIR) and (args.output_dir == OUTPUT_DIR):
+    if (args.input_dir is not None) and (args.output_dir == OUTPUT_DIR):
         args.output_dir = os.path.join(args.input_dir, OUTPUT_DIR)
 
     if not os.path.isdir(args.output_dir):
@@ -279,7 +292,7 @@ if __name__ == "__main__":
     status = status and (len(master["data"]) == len(slave3["data"]))
 
     if not status:
-        print("[ERROR]: Missing recording for cascase mimo configuration")
+        print("[ERROR]: Missing recording for cascade MIMO configuration")
         sys.exit(1)
 
     size: int = len(master["data"])
