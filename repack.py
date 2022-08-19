@@ -4,6 +4,7 @@
     @date: 13-08-2022
 """
 from typing import Optional
+from datetime import timedelta, datetime
 import os
 import glob
 import argparse
@@ -53,7 +54,7 @@ def getInfo(idx_file: str) -> tuple[int, int]:
                  * (sum of all planes)
                 */
                  uint32_t size;
-                 uint64_t timestamp;
+                 uint64_t timestamp; // timestamp in ns
                  uint64_t offset;
              };
 
@@ -76,7 +77,31 @@ def getInfo(idx_file: str) -> tuple[int, int]:
         ("size", np.uint64),
     ])
     header = np.fromfile(idx_file, dtype=dt, count=1)[0]
-    return header[3], header[4]
+
+    dt = np.dtype([
+        ("tag", np.uint16),
+        ("version", np.uint16),
+        ("flags", np.uint32),
+        ("width", np.uint16),
+        ("height", np.uint16),
+
+        ("_meta0", np.uint32),
+        ("_meta1", np.uint32),
+        ("_meta2", np.uint32),
+        ("_meta3", np.uint32),
+
+        ("size", np.uint32),
+        ("timestamp", np.uint64),
+        ("offset", np.uint64),
+    ])
+
+    data = np.fromfile(idx_file, dtype=dt, count=-1, offset=24)
+    timestamps = np.array([
+        (datetime.now() + timedelta(seconds=log[-2] * 1e-9)).timestamp()
+        for log in data
+    ])
+
+    return header[3], header[4], timestamps
 
 
 def load(inputdir: str, device: str) -> Optional[dict[str, list[str]]]:
@@ -165,7 +190,7 @@ def toframe(
     nrx: int = 4
 
     # Number of frame to skip at the beginning of the recording
-    nf_skip: int = 1
+    nf_skip: int = 0
 
     # Index used to number frames
     fk: int = start_idx
@@ -303,6 +328,8 @@ if __name__ == "__main__":
     # Number of frames generated from the last recording batch
     previous_nf: int = 0
 
+    timestamps = np.array([])
+
     for idx in range(size):
         # Master file
         mf: str = master["data"][idx]
@@ -313,11 +340,13 @@ if __name__ == "__main__":
         sf2: str = slave1["data"][idx]
         sf3: str = slave1["data"][idx]
 
-        nf, _ = getInfo(mf_idx)
+        nf, _, timelogs = getInfo(mf_idx)
 
         # Skip if the number of valid frame is 0
         if not nf:
             continue
+
+        timestamps = np.append(timestamps, timelogs)
 
         previous_nf = toframe(
             mf, sf1, sf2, sf3, # Input data files
@@ -327,5 +356,7 @@ if __name__ == "__main__":
             args.output_dir,
             start_idx=previous_nf + 1
         )
+    # Save all the timestamps in a single file
+    timestamps.tofile(os.path.join(args.output_dir, "timestamps.txt"), "\n")
 
     print(f"[SUCCESS]: {previous_nf:04d} MIMO frames successfully generated!")
