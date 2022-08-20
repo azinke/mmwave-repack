@@ -262,7 +262,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-nc", "--number-chirps",
-        help="Number of chirps per frame ",
+        help="Number of chirp loops per frame ",
         type=int,
         default=NC,
     )

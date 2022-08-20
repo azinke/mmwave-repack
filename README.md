@@ -93,7 +93,7 @@ python repack.py -i <path-to-recording-folder> -o <path-to-output-directory>
 If the output directory does not already exist, it will be created. Other options would
 keep their default values and MIMO frames will be saved in the specified output directory.
 
-2. Defining the number of samples per chirp or chrip loop
+3. Defining the number of samples per chirp or chrip loops per frame
 
 ```bash
 python repack.py -ns <nb-samples-per-chrip> -nc <nb-chrip-loop> -i <path-to-recording-folder>
@@ -111,7 +111,7 @@ import numpy as np
 
 ntx: int = 12       # Number of TX antenna enalbled (3 TX antenna per radar device)
 nrx: int = 16       # Number of RX antenna enabled (4 RX antenna per radar device)
-nchirp: int = 16    # Number of chrip loop
+nchirp: int = 16    # Number of chrip loops
 ns: int = 256       # Number of samples per chirp
 
 frame = np.fromfile("frame1.bin", dtype=np.int16, count=-1)
