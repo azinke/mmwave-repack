@@ -227,9 +227,8 @@ def toframe(
         fname: str = f"frame_{fk}.bin"
         fpath: str = os.path.join(output, fname)
         frame.astype(np.int16).tofile(fpath)
-        print(f"Frame {fk} written!")
+        print(f"Frame {fk} written!", end="\r")
         fk += 1
-    print()
     # Return the index of the last frame generated
     return fk - 1
 
@@ -356,6 +355,7 @@ if __name__ == "__main__":
             args.output_dir,
             start_idx=previous_nf + 1
         )
+    print(f"[SUCCESS]: {previous_nf:04} frames written!")
     # Save all the timestamps in a single file
     timestamps.tofile(os.path.join(args.output_dir, "timestamps.txt"), "\n")
 
