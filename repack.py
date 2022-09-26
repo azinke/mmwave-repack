@@ -336,8 +336,8 @@ if __name__ == "__main__":
 
         # Slave data files
         sf1: str = slave1["data"][idx]
-        sf2: str = slave1["data"][idx]
-        sf3: str = slave1["data"][idx]
+        sf2: str = slave2["data"][idx]
+        sf3: str = slave3["data"][idx]
 
         nf, _, timelogs = getInfo(mf_idx)
 
