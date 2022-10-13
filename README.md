@@ -40,6 +40,20 @@ as all the TX antenna. For custom layout, the script must be updated.
 - it's also assumed that recordings are in complex format. As so, for each samples,
 it's assumed that I and Q signals has been recorded.
 
+## Environment setup
+
+```bash
+# Clone the repository
+git clone <repo-url>
+cd mmwave-repack
+
+# Set up virtual environment and enable it
+python -m venv venv
+source ./venv/bin/activate
+
+# Install requirements
+python -m pip install -r requirements.txt
+```
 
 ## Usage
 
@@ -62,7 +76,7 @@ options:
   -o OUTPUT_DIR, --output-dir OUTPUT_DIR
                         Output directory for storing the mimo frames
   -i INPUT_DIR, --input-dir INPUT_DIR
-                        Inpout directory containing the recordings
+                        Input directory containing the recordings
 
 ```
 
@@ -93,7 +107,7 @@ python repack.py -i <path-to-recording-folder> -o <path-to-output-directory>
 If the output directory does not already exist, it will be created. Other options would
 keep their default values and MIMO frames will be saved in the specified output directory.
 
-3. Defining the number of samples per chirp or chrip loops per frame
+3. Defining the number of samples per chirp or chirp loops per frame
 
 ```bash
 python repack.py -ns <nb-samples-per-chrip> -nc <nb-chrip-loop> -i <path-to-recording-folder>
