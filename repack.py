@@ -273,7 +273,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-i", "--input-dir",
-        help="Inpout directory containing the recordings",
+        help="Input directory containing the recordings",
         type=str,
         default=None,
     )

@@ -12,3 +12,6 @@ venv
 
 # Track gitignore file
 !.gitignore
+
+# Allow the requirements file
+!requirements.txt
